@@ -25,12 +25,13 @@ in { nixpkgs ? fetch "nixpkgs" }: import nixpkgs {
   config = {};
   overlays =
     [
-      # Highcharts
+      # Local packages
       (self: super:
         { haskellPackages =
             super.haskellPackages.extend
               (super.haskell.lib.packageSourceOverrides
-                { highcharts = self.lib.cleanSource ../highcharts; }
+                { highcharts = self.lib.cleanSource ../highcharts;
+                  language-javascript-qq = self.lib.cleanSource ../language-javascript-qq; }
               );
         }
       )

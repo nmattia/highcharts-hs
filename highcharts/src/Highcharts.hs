@@ -1,10 +1,17 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE DataKinds #-}
 
 module Highcharts where
 
+import Javascript
 import IHaskell.Display (html)
+import GHC.TypeLits
 import qualified IHaskell.Display as IHaskell
-import Data.Aeson as Aeson
+import qualified Data.Aeson as Aeson
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.Encoding as TL
 import qualified Data.UUID as UUID
@@ -62,3 +69,33 @@ instance IHaskell.IHaskellDisplay Chart where
                 , html requireStanza
                 , html $ highcharts uuid v
                 ]
+
+data ChartArg = ChartArg
+  { _series :: Series
+  }
+
+
+data Series
+  = SeriesLine Line
+  | SeriesBar Bar
+
+data Line = Line
+  { allowPointSelect :: Bool
+  , name :: String
+  , animation :: Animation
+  , animationLimit :: Number
+  , boostThreshold :: Number
+  }
+
+type Number = Float
+
+data Animation = Animation { duration :: Number }
+
+data Bar = Bar
+  { name :: String }
+
+
+-- data Line = Line
+  -- { _name :: String
+
+  -- }

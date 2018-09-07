@@ -1,4 +1,4 @@
-{ with-jupyter ? true }:
+{ with-jupyter ? false }:
 let
   pkgs = import ./nix {};
   ROOT = builtins.toString ./.;
@@ -7,15 +7,11 @@ let
     [
       ''
         hc_ghci() {
-          pushd ${ROOT}/highcharts
           cabal new-repl
-          popd
         }
 
         hc_build() {
-          pushd ${ROOT}/highcharts
           cabal new-build
-          popd
         }
       ''
     ] ++ pkgs.lib.optional with-jupyter
@@ -34,7 +30,7 @@ let
       '';
 in pkgs.haskellPackages.shellFor
   {
-    packages = p: [ p.highcharts ];
+    packages = p: [ p.highcharts p.language-javascript-qq ];
     withHoogle = false;
     buildInputs =
       [ pkgs.cabal-install ] ++ pkgs.lib.optional with-jupyter ihaskell ;
