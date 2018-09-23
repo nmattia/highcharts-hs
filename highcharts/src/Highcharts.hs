@@ -1,19 +1,31 @@
-{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ExtendedDefaultRules #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RankNTypes #-}
 
 module Highcharts where
 
-import Javascript
 import IHaskell.Display (html)
-import GHC.TypeLits
+import Data.Semigroup
+import Language.JavaScript.JSQQ
+import Data.Aeson ((.=), object)
+import Highcharts.Chart (Chart, title)
+import Highcharts.Chart.Title (text)
+import Data.Default (def)
+-- import qualified Data.HashMap.Strict as Map
 import qualified IHaskell.Display as IHaskell
 import qualified Data.Aeson as Aeson
-import qualified Data.Text.Lazy as TL
-import qualified Data.Text.Lazy.Encoding as TL
 import qualified Data.UUID as UUID
 import System.Random (randomIO)
 
@@ -21,81 +33,56 @@ makeDiv :: UUID.UUID -> String
 makeDiv uuid = mconcat
     ["<div id=\"", UUID.toString uuid, "\"></div>"]
 
+highchartsConfig :: JS
+highchartsConfig = toJS $ object
+    [ "paths" .= object
+      [ "highcharts" .= "http://code.highcharts.com/6.1.1/highcharts"
+      , "highcharts_exports" .=
+          "http://code.highcharts.com/6.1.1/modules/exporting"
+      ]
+    , "shim" .= object
+      [ "highcharts" .= object
+        [ "exports" .= "Highcharts"
+        , "deps" .= ["jquery"]
+        ]
+      , "highcharts_exports" .= object
+        [ "exports" .= "Highcharts"
+        , "deps" .= ["highcharts"]
+        ]
+      ]
+    ]
+
 requireStanza :: String
-requireStanza = mconcat
-    [ "<script>"
-    , "require.config({"
-    , "paths: {"
-    , "highcharts: \"http://code.highcharts.com/6.1.1/highcharts\","
-    , "highcharts_exports: \"http://code.highcharts.com/6.1.1/modules/exporting\","
-    , "},"
-    , "shim: {"
-    , "highcharts: {"
-    , "  exports: \"Highcharts\","
-    , "  deps: [\"jquery\"]"
-    , " },"
-    , "highcharts_exports: {"
-    , " exports: \"Highcharts\","
-    , "  deps: [\"highcharts\"]"
-    , "}"
-    , "}"
-    , "});"
-    , "</script>"
-    ]
+requireStanza = "<script>" <> require <> "</script>"
+  where
+    require = [js|require.config($_highchartsConfig);|]
 
--- | Generate an HTML display.
-highcharts :: UUID.UUID -> Aeson.Value -> String
-highcharts uuid v = mconcat
-    [ "<script>"
-    , "require(['highcharts_exports'], function(Highcharts) {"
-    , "  Highcharts.chart( '"
-          , UUID.toString uuid
-          , "',"
-          , TL.unpack $ TL.decodeUtf8 $ Aeson.encode v,");"
-    , " });"
-    , "</script>"
-    ]
+highcharts :: UUID.UUID -> Chart -> String
+highcharts uuid v = "<script>" <> require <> "</script>"
+  where
+    require =
+      [js|
+        require($_exports, function(Highcharts)
+          { Highcharts.chart($_uuid, $_v) }
+          );
+      |]
+    exports = ["highcharts_exports"]
 
-
-data Chart = Chart Aeson.Value
+-- newtype Chart = Chart Aeson.Value
+  -- deriving newtype ToJS
 
 instance IHaskell.IHaskellDisplay Chart where
-    display (Chart v) = do
+    display chart = do
         uuid <- randomIO
         pure $
             IHaskell.ManyDisplay $
             (IHaskell.Display . (:[])) <$>
                 [ html (makeDiv uuid)
                 , html requireStanza
-                , html $ highcharts uuid v
+                , html $ highcharts uuid chart
                 ]
 
-data ChartArg = ChartArg
-  { _series :: Series
-  }
-
-
-data Series
-  = SeriesLine Line
-  | SeriesBar Bar
-
-data Line = Line
-  { allowPointSelect :: Bool
-  , name :: String
-  , animation :: Animation
-  , animationLimit :: Number
-  , boostThreshold :: Number
-  }
-
-type Number = Float
-
-data Animation = Animation { duration :: Number }
-
-data Bar = Bar
-  { name :: String }
-
-
--- data Line = Line
-  -- { _name :: String
-
-  -- }
+myChart :: Chart
+myChart =
+    title (text "foo" def) $
+    def

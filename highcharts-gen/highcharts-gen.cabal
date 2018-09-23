@@ -1,0 +1,28 @@
+name:                highcharts-gen
+version:             0.0.1
+license:             MIT
+author:              Nicolas Mattia
+maintainer:          nicolas@nmattia.com
+copyright:           (c) 2018 Nicolas Mattia
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable highcharts-gen
+  main-is:              Main.hs
+  build-depends:
+                        base
+                      , directory
+                      , containers
+                      , bytestring
+                      , filepath
+                      , aeson
+                      --, ihaskell
+                      --, lens
+                      --, uuid
+                      --, random
+                      , text
+                      , unordered-containers
+                      , vector
+                      --, js-qq
+                      --, template-haskell
+  ghc-options: -Wall -Werror

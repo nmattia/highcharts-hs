@@ -1,2 +1,3 @@
 packages: highcharts
-          language-javascript-qq
+          highcharts-gen
+          js-qq

@@ -27,12 +27,21 @@ in { nixpkgs ? fetch "nixpkgs" }: import nixpkgs {
     [
       # Local packages
       (self: super:
-        { haskellPackages =
+        let
+            src = self.runCommand "foo"
+                      { buildInputs = [ self.haskellPackages.highcharts-gen ];
+                      } "highcharts-gen ${../highcharts-gen/tree.json} $out";
+        in { haskellPackages =
             super.haskellPackages.extend
               (super.haskell.lib.packageSourceOverrides
                 { highcharts = self.lib.cleanSource ../highcharts;
-                  language-javascript-qq = self.lib.cleanSource ../language-javascript-qq; }
+                  language-javascript-qq = self.lib.cleanSource ../language-javascript-qq;
+                  js-qq = self.lib.cleanSource ../js-qq;
+                  highcharts-gen = self.lib.cleanSource ../highcharts-gen;
+                  highcharts-types = src;
+                }
               );
+          highcharts-types-src = src;
         }
       )
 

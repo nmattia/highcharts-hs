@@ -2,16 +2,25 @@
 let
   pkgs = import ./nix {};
   ROOT = builtins.toString ./.;
-  ihaskell = pkgs.ihaskellWithPackages (ps: [ ps.highcharts ]);
+  ihaskell = pkgs.ihaskellWithPackages (ps:
+    [ ps.highcharts ps.highcharts-types ]);
   functions =
     [
       ''
         hc_ghci() {
-          cabal new-repl
+          cabal new-repl highcharts
         }
 
         hc_build() {
-          cabal new-build
+          cabal new-build highcharts
+        }
+
+        jsqq_ghci() {
+          cabal new-repl js-qq
+        }
+
+        jsqq_build() {
+          cabal new-build js-qq
         }
       ''
     ] ++ pkgs.lib.optional with-jupyter
@@ -30,7 +39,7 @@ let
       '';
 in pkgs.haskellPackages.shellFor
   {
-    packages = p: [ p.highcharts p.language-javascript-qq ];
+    packages = p: [ p.highcharts p.highcharts-gen p.js-qq ];
     withHoogle = false;
     buildInputs =
       [ pkgs.cabal-install ] ++ pkgs.lib.optional with-jupyter ihaskell ;

@@ -9,14 +9,18 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:      Highcharts
-                        Javascript
   hs-source-dirs:       src
   build-depends:
                         base
                       , aeson
                       , ihaskell
+                      , highcharts-types
+                      , data-default
+                      --, lens
                       , uuid
                       , random
-                      , text
-                      , language-javascript
-                      , template-haskell
+                      --, text
+                      --, unordered-containers
+                      , js-qq
+                      --, template-haskell
+  ghc-options: -Wall
