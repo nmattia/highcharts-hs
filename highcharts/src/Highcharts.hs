@@ -17,7 +17,6 @@
 module Highcharts where
 
 import IHaskell.Display (html)
-import Data.Semigroup
 import Language.JavaScript.JSQQ
 import Data.Aeson ((.=), object)
 import Highcharts.Chart (Chart, title)

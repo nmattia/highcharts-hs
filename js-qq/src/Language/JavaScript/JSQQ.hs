@@ -8,7 +8,6 @@
 module Language.JavaScript.JSQQ where
 
 import Language.Haskell.TH.Quote
-import Data.Semigroup
 import Data.Maybe
 import Control.Monad
 import Language.Haskell.TH

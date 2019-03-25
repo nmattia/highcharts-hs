@@ -5,7 +5,6 @@
 module Main where
 
 import Control.Monad
-import Data.Semigroup
 import Data.Char (toUpper, isUpper)
 import Data.Maybe (mapMaybe)
 import System.Directory
